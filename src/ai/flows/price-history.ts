@@ -22,7 +22,7 @@ const PriceHistoryOutputSchema = z.object({
     prices: z.array(z.object({
         date: z.string().describe('The date of the price point (YYYY-MM-DD).'),
         price: z.number().describe('The average price on that date.'),
-    })).optional().describe('A list of historical price points.'),
+    })).optional().describe('A list of historical price points for the last 90 days.'),
 });
 export type PriceHistoryOutput = z.infer<typeof PriceHistoryOutputSchema>;
 
@@ -30,52 +30,27 @@ export async function getPriceHistory(input: PriceHistoryInput): Promise<PriceHi
   return priceHistoryFlow(input);
 }
 
-const getHistoricalPricesForRoute = ai.defineTool({
-    name: 'getHistoricalPricesForRoute',
-    description: 'Retrieves historical price data for a given flight route.',
-    inputSchema: z.object({
-      route: z.string().describe('The flight route (e.g., JFK-LHR).'),
-    }),
-    outputSchema: z.object({
-        isValidRoute: z.boolean(),
-        prices: z.array(z.object({
-            date: z.string(),
-            price: z.number(),
-        })).optional(),
-    }),
-  }, async ({ route }) => {
-    // Placeholder data
-    if (['JFK-LHR', 'SYD-LAX', 'SYD-SIN-LHR'].includes(route.toUpperCase())) {
-        const prices = [];
-        const today = new Date();
-        for (let i = 90; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(today.getDate() - i);
-            const basePrice = route.toUpperCase() === 'JFK-LHR' ? 600 : 1100;
-            const price = basePrice + Math.sin(i / 10) * 100 + Math.random() * 50 - 25;
-            prices.push({
-                date: date.toISOString().split('T')[0],
-                price: Math.round(price),
-            });
-        }
-      return { isValidRoute: true, prices };
-    }
-    return { isValidRoute: false };
-  }
-);
-
+const PriceHistoryPromptInputSchema = z.object({
+    route: z.string().describe('The flight route (e.g., JFK-LHR).'),
+    currentDate: z.string().describe("Today's date in YYYY-MM-DD format.")
+});
 
 const prompt = ai.definePrompt({
   name: 'priceHistoryPrompt',
-  input: {schema: PriceHistoryInputSchema},
+  input: {schema: PriceHistoryPromptInputSchema},
   output: {schema: PriceHistoryOutputSchema},
-  tools: [getHistoricalPricesForRoute],
-  prompt: `You are a flight price analyst.
-  The user has provided a flight route. Use the 'getHistoricalPricesForRoute' tool to retrieve the historical price data for the last 90 days.
+  prompt: `You are an expert flight price analyst. Your task is to provide a plausible set of historical price data for a given flight route based on your knowledge of airline pricing.
+
+  Today's date is {{currentDate}}.
+
+  For the flight route '{{{route}}}', please do the following:
+  1.  First, determine if the route is a real, valid flight route.
+  2.  If the route is valid, generate a list of daily average prices for the last 90 days, ending today. The data should reflect typical price fluctuations due to demand, time of week, and other factors. Provide a price for each of the 90 days.
+  3.  If the route is invalid or you have no data for it, you must set 'isValidRoute' to false and the 'prices' array should be empty.
+
+  Please provide the response in the structured JSON format defined by the output schema.
   
-  Route: {{{route}}}
-  
-  Return whether the route has data and the list of price points. If not, just return isValidRoute: false.`,
+  Route: {{{route}}}`,
 });
 
 const priceHistoryFlow = ai.defineFlow(
@@ -85,7 +60,20 @@ const priceHistoryFlow = ai.defineFlow(
     outputSchema: PriceHistoryOutputSchema,
   },
   async (input) => {
-    const {output} = await prompt(input);
-    return output!;
+    // Add today's date to the prompt context.
+    const currentDate = new Date().toISOString().split('T')[0];
+    const {output} = await prompt({ route: input.route, currentDate });
+    
+    if (!output) {
+        return { isValidRoute: false };
+    }
+
+    // If the model claims the route is valid but provides no prices,
+    // we override it to be invalid to give the user proper feedback.
+    if (output.isValidRoute && (!output.prices || output.prices.length === 0)) {
+        return { isValidRoute: false };
+    }
+
+    return output;
   }
 );
