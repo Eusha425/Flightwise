@@ -13,13 +13,13 @@ import {
 } from '@/ai/flows/route-explorer';
 
 import {
-    getAirlineComparison,
+    getAirlineComparison as getAirlineComparisonFlow,
     type AirlineComparisonInput,
     type AirlineComparisonOutput,
 } from '@/ai/flows/airline-comparison';
 
 import {
-    getPriceHistory,
+    getPriceHistory as getPriceHistoryFlow,
     type PriceHistoryInput,
     type PriceHistoryOutput,
 } from '@/ai/flows/price-history';
@@ -35,9 +35,9 @@ export async function getRouteExplorerData(input: RouteExplorerInput): Promise<R
 }
 
 export async function getAirlineComparison(input: AirlineComparisonInput): Promise<AirlineComparisonOutput> {
-    return await getAirlineComparison(input);
+    return await getAirlineComparisonFlow(input);
 }
 
 export async function getPriceHistory(input: PriceHistoryInput): Promise<PriceHistoryOutput> {
-    return await getPriceHistory(input);
+    return await getPriceHistoryFlow(input);
 }
