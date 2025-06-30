@@ -54,28 +54,41 @@ const getReachableDestinations = ai.defineTool({
       'JFK': {
         name: 'John F. Kennedy International Airport',
         destinations: [
-          { code: 'LHR', name: 'London Heathrow', country: 'UK' },
-          { code: 'CDG', name: 'Charles de Gaulle Airport', country: 'France' },
-          { code: 'NRT', name: 'Narita International Airport', country: 'Japan' },
-          { code: 'LAX', name: 'Los Angeles International Airport', country: 'USA' },
-          { code: 'DXB', name: 'Dubai International Airport', country: 'UAE' },
+            { code: 'LAX', name: 'Los Angeles', country: 'USA' },
+            { code: 'LHR', name: 'London', country: 'UK' },
+            { code: 'CDG', name: 'Paris', country: 'France' },
+            { code: 'FRA', name: 'Frankfurt', country: 'Germany' },
+            { code: 'MEX', name: 'Mexico City', country: 'Mexico' },
+            { code: 'MIA', name: 'Miami', country: 'USA' },
+            { code: 'SFO', name: 'San Francisco', country: 'USA' },
+            { code: 'ATL', name: 'Atlanta', country: 'USA' },
+            { code: 'JNB', name: 'Johannesburg', country: 'South Africa' },
+            { code: 'DXB', name: 'Dubai', country: 'UAE' },
+            { code: 'HND', name: 'Tokyo', country: 'Japan' },
+            { code: 'GRU', name: 'Sao Paulo', country: 'Brazil' },
+            { code: 'SYD', name: 'Sydney', country: 'Australia' },
+            { code: 'BOM', name: 'Mumbai', country: 'India' },
         ],
       },
       'LHR': {
         name: 'London Heathrow',
         destinations: [
-          { code: 'JFK', name: 'John F. Kennedy International Airport', country: 'USA' },
-          { code: 'SIN', name: 'Singapore Changi Airport', country: 'Singapore' },
-          { code: 'HKG', name: 'Hong Kong International Airport', country: 'Hong Kong' },
-          { code: 'SYD', name: 'Sydney Airport', country: 'Australia' },
+          { code: 'JFK', name: 'New York', country: 'USA' },
+          { code: 'SIN', name: 'Singapore', country: 'Singapore' },
+          { code: 'HKG', name: 'Hong Kong', country: 'Hong Kong' },
+          { code: 'SYD', name: 'Sydney', country: 'Australia' },
+          { code: 'DXB', name: 'Dubai', country: 'UAE' },
+          { code: 'JNB', name: 'Johannesburg', country: 'South Africa' },
         ],
       },
       'SYD': {
         name: 'Sydney Airport',
         destinations: [
-          { code: 'LAX', name: 'Los Angeles International Airport', country: 'USA' },
-          { code: 'SIN', name: 'Singapore Changi Airport', country: 'Singapore' },
-          { code: 'AKL', name: 'Auckland Airport', country: 'New Zealand' },
+          { code: 'LAX', name: 'Los Angeles', country: 'USA' },
+          { code: 'SIN', name: 'Singapore', country: 'Singapore' },
+          { code: 'AKL', name: 'Auckland', country: 'New Zealand' },
+          { code: 'HKG', name: 'Hong Kong', country: 'Hong Kong' },
+          { code: 'DXB', name: 'Dubai', country: 'UAE' },
         ],
       },
     };
@@ -109,7 +122,29 @@ const routeExplorerFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await prompt(input);
-    if (output?.isValidAirport) {
+    if (output?.isValidAirport && output.destinations && output.destinations.length > 0) {
+        const destinationList = output.destinations.map(d => `${d.name} (${d.code})`).join(', ');
+        const imageGenPrompt = `A stylized, minimalist world map showing flight paths from ${output.airportName}. Show bright orange flight paths radiating out to these destinations: ${destinationList}. The map should have a clean, modern aesthetic, with deep sky blue oceans and light gray continents.`;
+
+        try {
+            const {media} = await ai.generate({
+                model: 'googleai/gemini-2.0-flash-preview-image-generation',
+                prompt: imageGenPrompt,
+                config: {
+                    responseModalities: ['TEXT', 'IMAGE'],
+                },
+            });
+
+            if (media?.url) {
+                output.mapImageUrl = media.url;
+            } else {
+                 output.mapImageUrl = 'https://placehold.co/800x400.png';
+            }
+        } catch (e) {
+            console.error("Image generation for route map failed:", e);
+            output.mapImageUrl = 'https://placehold.co/800x400.png';
+        }
+    } else if (output?.isValidAirport) {
         output.mapImageUrl = 'https://placehold.co/800x400.png';
     }
     return output!;
