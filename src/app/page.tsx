@@ -7,24 +7,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FlightWiseLogo } from '@/components/FlightWiseLogo';
 import BestTimeToBookRecommender from '@/components/BestTimeToBookRecommender';
+import RouteExplorer from '@/components/RouteExplorer';
+import AirlineComparison from '@/components/AirlineComparison';
+import PriceHistory from '@/components/PriceHistory';
 import { CircleDotDashed, DollarSign, PlaneLanding, Waypoints } from 'lucide-react';
-
-function PlaceholderComponent({ title }: { title: string }) {
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex min-h-[450px] flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm">
-          <div className="flex flex-col items-center gap-1 text-center">
-            <h3 className="text-2xl font-bold tracking-tight">{title}</h3>
-            <p className="text-sm text-muted-foreground">
-              This feature is coming soon.
-            </p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
 
 export default function Home() {
   return (
@@ -108,13 +94,13 @@ export default function Home() {
             <BestTimeToBookRecommender />
           </TabsContent>
           <TabsContent value="explorer">
-            <PlaceholderComponent title="Interactive Route Explorer" />
+            <RouteExplorer />
           </TabsContent>
           <TabsContent value="comparison">
-            <PlaceholderComponent title="Airline Comparison Tool" />
+            <AirlineComparison />
           </TabsContent>
           <TabsContent value="history">
-            <PlaceholderComponent title="Price History Visualization" />
+            <PriceHistory />
           </TabsContent>
         </Tabs>
       </main>
