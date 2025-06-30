@@ -48,18 +48,34 @@ const getHistoricalFlightPrices = ai.defineTool({
     date: z.string().describe('Date of the flight price data'),
     price: z.number().describe('Price of the flight'),
   })),
-}, async (input) => {
-    // TODO: Implement the logic to fetch historical flight prices from a data source
-    // This is a placeholder implementation, replace with actual data retrieval.
-    console.log("getHistoricalFlightPrices called with", input);
+}, async ({ route, departureDate }) => {
+    console.log("getHistoricalFlightPrices called with", { route, departureDate });
 
-    const historicalData = [
-      {date: '2024-01-01', price: 1200},
-      {date: '2024-01-15', price: 1100},
-      {date: '2024-02-01', price: 1300},
-      {date: '2024-_02-15', price: 1000},
-      {date: '2024-03-01', price: 1150},
-    ];
+    // In a real application, you would fetch this from a database.
+    // For this demo, we'll generate some plausible-looking data.
+    if (!['JFK-LHR', 'SYD-LAX', 'SYD-SIN-LHR'].includes(route.toUpperCase())) {
+        // Return an empty array if the route is not supported in this demo
+        return [];
+    }
+
+    const historicalData = [];
+    const today = new Date();
+    // Generate data for the 90 days leading up to today.
+    for (let i = 90; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        
+        // Base price varies by route
+        const basePrice = route.toUpperCase() === 'JFK-LHR' ? 600 : 1100;
+        
+        // Simulate price fluctuations (e.g., sine wave for seasonality + random noise)
+        const price = basePrice + Math.sin(i / 10) * 100 + Math.random() * 50 - 25;
+        
+        historicalData.push({
+            date: date.toISOString().split('T')[0],
+            price: Math.round(price),
+        });
+    }
 
     return historicalData;
   },
