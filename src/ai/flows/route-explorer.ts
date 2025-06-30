@@ -102,6 +102,19 @@ const getReachableDestinations = ai.defineTool({
           { code: 'DXB', name: 'Dubai', country: 'UAE', coords: { lat: 25.2532, lon: 55.3657 } },
         ],
       },
+      'DAC': {
+        name: 'Shahjalal International Airport',
+        coords: { lat: 23.8433, lon: 90.3978 },
+        destinations: [
+            { code: 'DXB', name: 'Dubai', country: 'UAE', coords: { lat: 25.2532, lon: 55.3657 } },
+            { code: 'SIN', name: 'Singapore', country: 'Singapore', coords: { lat: 1.3644, lon: 103.9915 } },
+            { code: 'KUL', name: 'Kuala Lumpur', country: 'Malaysia', coords: { lat: 2.7456, lon: 101.7072 } },
+            { code: 'BKK', name: 'Bangkok', country: 'Thailand', coords: { lat: 13.6900, lon: 100.7501 } },
+            { code: 'CCU', name: 'Kolkata', country: 'India', coords: { lat: 22.6547, lon: 88.4467 } },
+            { code: 'JED', name: 'Jeddah', country: 'Saudi Arabia', coords: { lat: 21.6796, lon: 39.1565 } },
+            { code: 'KTM', name: 'Kathmandu', country: 'Nepal', coords: { lat: 27.6966, lon: 85.3592 } },
+        ],
+      },
     };
     const data = airportData[airport.toUpperCase()];
     if (data) {
