@@ -5,35 +5,21 @@
  * @fileOverview Visualizes historical flight price data for a given route.
  *
  * - getPriceHistory - A function that handles the price history retrieval process.
- * - PriceHistoryInput - The input type for the getPriceHistory function.
- * - PriceHistoryOutput - The return type for the getPriceHistory function.
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { 
+    PriceHistoryInputSchema,
+    PriceHistoryOutputSchema,
+    PriceHistoryPromptInputSchema,
+    type PriceHistoryInput,
+    type PriceHistoryOutput,
+} from '@/ai/types';
 
-const PriceHistoryInputSchema = z.object({
-  route: z.string().describe('The flight route (e.g., JFK-LHR).'),
-});
-export type PriceHistoryInput = z.infer<typeof PriceHistoryInputSchema>;
-
-const PriceHistoryOutputSchema = z.object({
-    isValidRoute: z.boolean().describe('Whether the provided route has historical data.'),
-    prices: z.array(z.object({
-        date: z.string().describe('The date of the price point (YYYY-MM-DD).'),
-        price: z.number().describe('The average price on that date.'),
-    })).optional().describe('A list of historical price points for the last 90 days.'),
-});
-export type PriceHistoryOutput = z.infer<typeof PriceHistoryOutputSchema>;
 
 export async function getPriceHistory(input: PriceHistoryInput): Promise<PriceHistoryOutput> {
   return priceHistoryFlow(input);
 }
-
-const PriceHistoryPromptInputSchema = z.object({
-    route: z.string().describe('The flight route (e.g., JFK-LHR).'),
-    currentDate: z.string().describe("Today's date in YYYY-MM-DD format.")
-});
 
 const prompt = ai.definePrompt({
   name: 'priceHistoryPrompt',

@@ -5,35 +5,15 @@
  * @fileOverview Finds all reachable destinations from a given airport using AI.
  *
  * - exploreRoute - A function that handles the route exploration process.
- * - RouteExplorerInput - The input type for the exploreRoute function.
- * - RouteExplorerOutput - The return type for the exploreRoute function.
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-
-const RouteExplorerInputSchema = z.object({
-  airport: z.string().describe('The IATA code of the origin airport (e.g., JFK).'),
-});
-export type RouteExplorerInput = z.infer<typeof RouteExplorerInputSchema>;
-
-const CoordsSchema = z.object({
-    lat: z.number().describe('Latitude'),
-    lon: z.number().describe('Longitude'),
-});
-
-const RouteExplorerOutputSchema = z.object({
-  isValidAirport: z.boolean().describe('Whether the provided airport code is valid.'),
-  airportName: z.string().optional().describe('The full name of the airport.'),
-  originCoords: CoordsSchema.optional().describe('The coordinates of the origin airport.'),
-  destinations: z.array(z.object({
-      code: z.string().describe('IATA code of the destination airport.'),
-      name: z.string().describe('Name of the destination city/airport.'),
-      country: z.string().describe('Country of the destination.'),
-      coords: CoordsSchema.describe('Coordinates of the destination airport.'),
-    })).optional().describe('A list of at least 10 major direct flight destinations.'),
-});
-export type RouteExplorerOutput = z.infer<typeof RouteExplorerOutputSchema>;
+import { 
+    RouteExplorerInputSchema, 
+    RouteExplorerOutputSchema, 
+    type RouteExplorerInput, 
+    type RouteExplorerOutput 
+} from '@/ai/types';
 
 export async function exploreRoute(input: RouteExplorerInput): Promise<RouteExplorerOutput> {
   return routeExplorerFlow(input);

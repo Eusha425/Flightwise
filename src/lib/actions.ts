@@ -1,28 +1,22 @@
 'use server';
 
-import {
-  bestTimeToBookRecommender,
-  type BestTimeToBookRecommenderInput,
-  type BestTimeToBookRecommenderOutput,
-} from '@/ai/flows/best-time-to-book-recommender';
+import { bestTimeToBookRecommender } from '@/ai/flows/best-time-to-book-recommender';
+import { exploreRoute } from '@/ai/flows/route-explorer';
+import { getAirlineComparison as getAirlineComparisonFlow } from '@/ai/flows/airline-comparison';
+import { getPriceHistory as getPriceHistoryFlow } from '@/ai/flows/price-history';
+import { getDashboardAnalytics as getDashboardAnalyticsFlow } from '@/ai/flows/dashboard-analytics';
 
-import {
-    exploreRoute,
-    type RouteExplorerInput,
-    type RouteExplorerOutput,
-} from '@/ai/flows/route-explorer';
-
-import {
-    getAirlineComparison as getAirlineComparisonFlow,
-    type AirlineComparisonInput,
-    type AirlineComparisonOutput,
-} from '@/ai/flows/airline-comparison';
-
-import {
-    getPriceHistory as getPriceHistoryFlow,
-    type PriceHistoryInput,
-    type PriceHistoryOutput,
-} from '@/ai/flows/price-history';
+import type {
+    BestTimeToBookRecommenderInput,
+    BestTimeToBookRecommenderOutput,
+    RouteExplorerInput,
+    RouteExplorerOutput,
+    AirlineComparisonInput,
+    AirlineComparisonOutput,
+    PriceHistoryInput,
+    PriceHistoryOutput,
+    DashboardAnalyticsOutput
+} from '@/ai/types';
 
 export async function getBookingRecommendation(
   input: BestTimeToBookRecommenderInput
@@ -40,4 +34,8 @@ export async function getAirlineComparison(input: AirlineComparisonInput): Promi
 
 export async function getPriceHistory(input: PriceHistoryInput): Promise<PriceHistoryOutput> {
     return await getPriceHistoryFlow(input);
+}
+
+export async function getDashboardAnalytics(): Promise<DashboardAnalyticsOutput> {
+    return await getDashboardAnalyticsFlow();
 }

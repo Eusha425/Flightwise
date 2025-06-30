@@ -24,7 +24,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Loader2, AreaChart, TrendingUp } from 'lucide-react';
 import { getPriceHistory } from '@/lib/actions';
-import { type PriceHistoryOutput } from '@/ai/flows/price-history';
+import { type PriceHistoryOutput } from '@/ai/types';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';

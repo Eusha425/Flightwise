@@ -23,7 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Loader2, Search, Star, Plane } from 'lucide-react';
 import { getAirlineComparison } from '@/lib/actions';
-import { type AirlineComparisonOutput } from '@/ai/flows/airline-comparison';
+import { type AirlineComparisonOutput } from '@/ai/types';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Badge } from './ui/badge';

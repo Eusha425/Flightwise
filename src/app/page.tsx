@@ -11,8 +11,11 @@ import RouteExplorer from '@/components/RouteExplorer';
 import AirlineComparison from '@/components/AirlineComparison';
 import PriceHistory from '@/components/PriceHistory';
 import { CircleDotDashed, DollarSign, PlaneLanding, Waypoints } from 'lucide-react';
+import { getDashboardAnalytics } from '@/lib/actions';
 
-export default function Home() {
+export default async function Home() {
+  const analyticsData = await getDashboardAnalytics();
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur md:px-6">
@@ -36,9 +39,9 @@ export default function Home() {
               <Waypoints className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,234,567</div>
+              <div className="text-2xl font-bold">{analyticsData.totalRoutesAnalyzed.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
-                +20.1% from last month
+                {analyticsData.totalRoutesAnalyzedChange} from last month
               </p>
             </CardContent>
           </Card>
@@ -50,9 +53,9 @@ export default function Home() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+2,350</div>
+              <div className="text-2xl font-bold">+{analyticsData.pricePredictionsMade.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
-                +180.1% from last month
+                {analyticsData.pricePredictionsMadeChange} from last month
               </p>
             </CardContent>
           </Card>
@@ -62,7 +65,7 @@ export default function Home() {
               <CircleDotDashed className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12</div>
+              <div className="text-2xl font-bold">{analyticsData.hubAirportsCount.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
                 Top airports by connectivity
               </p>
@@ -76,7 +79,7 @@ export default function Home() {
               <PlaneLanding className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+573</div>
+              <div className="text-2xl font-bold">+{analyticsData.underservedAirportsCount.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
                 Identified for potential growth
               </p>

@@ -5,29 +5,16 @@
  * @fileOverview Compares airlines for a given route.
  *
  * - getAirlineComparison - A function that handles the airline comparison process.
- * - AirlineComparisonInput - The input type for the getAirlineComparison function.
- * - AirlineComparisonOutput - The return type for the getAirlineComparison function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-
-const AirlineComparisonInputSchema = z.object({
-  route: z.string().describe('The flight route (e.g., JFK-LHR).'),
-});
-export type AirlineComparisonInput = z.infer<typeof AirlineComparisonInputSchema>;
-
-const AirlineComparisonOutputSchema = z.object({
-  isValidRoute: z.boolean().describe('Whether the provided route is valid.'),
-  airlines: z.array(z.object({
-      name: z.string().describe('Airline name.'),
-      rating: z.number().describe('Customer rating out of 5.'),
-      amenities: z.array(z.string()).describe('List of in-flight amenities.'),
-      duration: z.string().describe('Typical flight duration.'),
-      price: z.number().describe('Typical price for the route.'),
-    })).optional().describe('A list of airlines servicing the route.'),
-});
-export type AirlineComparisonOutput = z.infer<typeof AirlineComparisonOutputSchema>;
+import { 
+    AirlineComparisonInputSchema, 
+    AirlineComparisonOutputSchema, 
+    type AirlineComparisonInput, 
+    type AirlineComparisonOutput 
+} from '@/ai/types';
 
 export async function getAirlineComparison(input: AirlineComparisonInput): Promise<AirlineComparisonOutput> {
   return airlineComparisonFlow(input);

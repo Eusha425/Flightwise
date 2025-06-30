@@ -26,7 +26,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Loader2, Send, Globe, PlaneTakeoff, MapPin } from 'lucide-react';
 import { getRouteExplorerData } from '@/lib/actions';
-import { type RouteExplorerOutput } from '@/ai/flows/route-explorer';
+import { type RouteExplorerOutput } from '@/ai/types';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const formSchema = z.object({
@@ -101,9 +101,9 @@ export default function RouteExplorer() {
         setData(result);
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'An unknown error occurred.'
-      );
+        setError(
+            err instanceof Error ? err.message : 'An unknown error occurred.'
+        );
     } finally {
       setLoading(false);
     }

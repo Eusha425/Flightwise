@@ -5,31 +5,15 @@
  * @fileOverview Recommends the best time to book a flight for a given route and date using AI knowledge.
  *
  * - bestTimeToBookRecommender - A function that handles the recommendation process.
- * - BestTimeToBookRecommenderInput - The input type for the bestTimeToBookRecommender function.
- * - BestTimeToBookRecommenderOutput - The return type for the bestTimeToBookRecommender function.
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-
-const BestTimeToBookRecommenderInputSchema = z.object({
-  route: z.string().describe('The flight route (e.g., SYD-SIN-LHR).'),
-  departureDate: z.string().describe('The departure date (YYYY-MM-DD).'),
-});
-export type BestTimeToBookRecommenderInput = z.infer<
-  typeof BestTimeToBookRecommenderInputSchema
->;
-
-const BestTimeToBookRecommenderOutputSchema = z.object({
-  recommendation: z
-    .string()
-    .describe(
-      'The recommended time to book the flight, along with a confidence level.'
-    ),
-});
-export type BestTimeToBookRecommenderOutput = z.infer<
-  typeof BestTimeToBookRecommenderOutputSchema
->;
+import { 
+    BestTimeToBookRecommenderInputSchema, 
+    BestTimeToBookRecommenderOutputSchema,
+    type BestTimeToBookRecommenderInput,
+    type BestTimeToBookRecommenderOutput
+} from '@/ai/types';
 
 export async function bestTimeToBookRecommender(
   input: BestTimeToBookRecommenderInput
