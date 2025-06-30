@@ -123,8 +123,7 @@ const routeExplorerFlow = ai.defineFlow(
   async (input) => {
     const {output} = await prompt(input);
     if (output?.isValidAirport && output.destinations && output.destinations.length > 0) {
-        const destinationList = output.destinations.map(d => `${d.name} (${d.code})`).join(', ');
-        const imageGenPrompt = `A stylized, minimalist world map showing flight paths from ${output.airportName}. Show bright orange flight paths radiating out to these destinations: ${destinationList}. The map should have a clean, modern aesthetic, with deep sky blue oceans and light gray continents.`;
+        const imageGenPrompt = `A stylized, minimalist world map showing flight paths originating from ${output.airportName}. The map should have a clean, modern aesthetic, with deep sky blue oceans and light gray continents. Show numerous bright orange flight paths radiating out from the origin to various international destinations.`;
 
         try {
             const {media} = await ai.generate({
