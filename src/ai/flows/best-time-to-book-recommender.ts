@@ -2,7 +2,7 @@
 'use server';
 
 /**
- * @fileOverview Recommends the best time to book a flight for a given route and date using historical pricing data.
+ * @fileOverview Recommends the best time to book a flight for a given route and date using AI knowledge.
  *
  * - bestTimeToBookRecommender - A function that handles the recommendation process.
  * - BestTimeToBookRecommenderInput - The input type for the bestTimeToBookRecommender function.
@@ -37,61 +37,14 @@ export async function bestTimeToBookRecommender(
   return bestTimeToBookRecommenderFlow(input);
 }
 
-const getHistoricalFlightPrices = ai.defineTool({
-  name: 'getHistoricalFlightPrices',
-  description: 'Retrieves historical flight prices for a given route and date.',
-  inputSchema: z.object({
-    route: z.string().describe('The flight route (e.g., SYD-SIN-LHR).'),
-    departureDate: z.string().describe('The departure date (YYYY-MM-DD).'),
-  }),
-  outputSchema: z.array(z.object({
-    date: z.string().describe('Date of the flight price data'),
-    price: z.number().describe('Price of the flight'),
-  })),
-}, async ({ route, departureDate }) => {
-    console.log("getHistoricalFlightPrices called with", { route, departureDate });
-
-    // In a real application, you would fetch this from a database.
-    // For this demo, we'll generate some plausible-looking data.
-    if (!['JFK-LHR', 'SYD-LAX', 'SYD-SIN-LHR'].includes(route.toUpperCase())) {
-        // Return an empty array if the route is not supported in this demo
-        return [];
-    }
-
-    const historicalData = [];
-    const today = new Date();
-    // Generate data for the 90 days leading up to today.
-    for (let i = 90; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(today.getDate() - i);
-        
-        // Base price varies by route
-        const basePrice = route.toUpperCase() === 'JFK-LHR' ? 600 : 1100;
-        
-        // Simulate price fluctuations (e.g., sine wave for seasonality + random noise)
-        const price = basePrice + Math.sin(i / 10) * 100 + Math.random() * 50 - 25;
-        
-        historicalData.push({
-            date: date.toISOString().split('T')[0],
-            price: Math.round(price),
-        });
-    }
-
-    return historicalData;
-  },
-);
-
 const prompt = ai.definePrompt({
   name: 'bestTimeToBookPrompt',
   input: {schema: BestTimeToBookRecommenderInputSchema},
   output: {schema: BestTimeToBookRecommenderOutputSchema},
-  tools: [getHistoricalFlightPrices],
-  system: `You are an expert travel consultant. Your goal is to recommend the best time to book a flight based on historical price data.
-You have access to a tool called 'getHistoricalFlightPrices' that provides past price data for this route.
-1. Call the 'getHistoricalFlightPrices' tool with the user's route and departure date.
-2. Analyze the historical price data returned by the tool. Look for trends (e.g., are prices generally increasing, decreasing, or stable?).
-3. Based on your analysis, provide a clear recommendation. For example: "Prices are currently low, book now. Confidence: High." or "Prices are trending down, it's better to wait a few weeks. Confidence: Medium."
-4. Formulate your final answer into the required JSON format.`,
+  system: `You are an expert travel consultant. Your goal is to recommend the best time to book a flight. 
+Analyze the user's provided route and departure date to give a recommendation based on your knowledge of travel trends, seasonality, and common booking patterns. 
+For example: "For a summer flight to Europe, it's best to book 3-5 months in advance. I recommend booking soon. Confidence: High." or "Flights to Southeast Asia during the monsoon season can be cheaper if you book closer to the date, but availability might be limited. I'd suggest waiting a few weeks. Confidence: Medium."
+Formulate your final answer into the required JSON format.`,
   prompt: `Recommend the best time to book for a flight on route {{{route}}} for departure date {{{departureDate}}}.`,
   config: {
     safetySettings: [
