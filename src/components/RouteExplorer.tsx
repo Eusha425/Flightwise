@@ -4,8 +4,8 @@ import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Map, { Marker, Source, Layer, type LayerProps } from 'react-map-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import Map, { Marker, Source, Layer, type LayerProps } from 'react-map-gl/maplibre';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 import {
   Card,
@@ -35,8 +35,6 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
-
 const routeLayer: LayerProps = {
     id: 'routes',
     type: 'line',
@@ -50,6 +48,31 @@ const routeLayer: LayerProps = {
       'line-width': 2,
       'line-opacity': 0.8,
     },
+};
+
+const cartoDarkStyle = {
+    version: 8,
+    sources: {
+        'carto-dark': {
+            type: 'raster',
+            tiles: [
+                'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+                'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+                'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            ],
+            tileSize: 256,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        },
+    },
+    layers: [
+        {
+            id: 'carto-dark-layer',
+            type: 'raster',
+            source: 'carto-dark',
+            minzoom: 0,
+            maxzoom: 22,
+        },
+    ],
 };
 
 export default function RouteExplorer() {
@@ -69,9 +92,6 @@ export default function RouteExplorer() {
     setError(null);
     setData(null);
     try {
-      if (!MAPBOX_TOKEN) {
-        throw new Error('Mapbox access token is not configured. Please add NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN to your .env file.');
-      }
       const result = await getRouteExplorerData({
         airport: values.airport.toUpperCase(),
       });
@@ -173,15 +193,14 @@ export default function RouteExplorer() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            {data && data.originCoords && data.destinations && MAPBOX_TOKEN && (
+            {data && data.originCoords && data.destinations && (
               <Map
                 initialViewState={{
                   longitude: data.originCoords.lon,
                   latitude: data.originCoords.lat,
                   zoom: 3,
                 }}
-                mapboxAccessToken={MAPBOX_TOKEN}
-                mapStyle="mapbox://styles/mapbox/dark-v11"
+                mapStyle={cartoDarkStyle as any}
                 style={{width: '100%', height: '100%', borderRadius: '0.5rem'}}
               >
                 {routeGeoJson && (
