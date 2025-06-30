@@ -95,11 +95,10 @@ const prompt = ai.definePrompt({
   tools: [getReachableDestinations],
   prompt: `You are an airline route analyst.
   The user has provided an airport code. Use the 'getReachableDestinations' tool to find all direct flight destinations from that airport.
-  If the airport is valid, also generate a placeholder map image URL from placehold.co showing a generic world map (e.g. 800x400).
   
   Airport: {{{airport}}}
   
-  Return the validation status, airport name, list of destinations, and map image URL. If the airport is invalid, just return isValidAirport: false.`,
+  Return the validation status, airport name, and list of destinations. If the airport is invalid, just return isValidAirport: false.`,
 });
 
 const routeExplorerFlow = ai.defineFlow(
