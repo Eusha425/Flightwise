@@ -23,14 +23,14 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Loader2, AreaChart, TrendingUp } from 'lucide-react';
-import { getPriceHistoryData } from '@/lib/actions';
+import { getPriceHistory } from '@/lib/actions';
 import { type PriceHistoryOutput } from '@/ai/flows/price-history';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 
 const formSchema = z.object({
-    route: z.string().regex(/^[A-Z]{3}-[A-Z]{3}$/, 'Route must be in the format XXX-YYY, e.g., JFK-LHR.'),
+    route: z.string().regex(/^([A-Z]{3}-)+[A-Z]{3}$/, 'Route must be in format XXX-YYY or XXX-YYY-ZZZ.'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -59,7 +59,7 @@ export default function PriceHistory() {
     setError(null);
     setData(null);
     try {
-      const result = await getPriceHistoryData({
+      const result = await getPriceHistory({
         route: values.route.toUpperCase(),
       });
       if (!result.isValidRoute) {

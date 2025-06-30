@@ -22,14 +22,14 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Loader2, Search, Star, Plane } from 'lucide-react';
-import { getAirlineComparisonData } from '@/lib/actions';
+import { getAirlineComparison } from '@/lib/actions';
 import { type AirlineComparisonOutput } from '@/ai/flows/airline-comparison';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Badge } from './ui/badge';
 
 const formSchema = z.object({
-  route: z.string().regex(/^[A-Z]{3}-[A-Z]{3}$/, 'Route must be in the format XXX-YYY, e.g., JFK-LHR.'),
+  route: z.string().regex(/^([A-Z]{3}-)+[A-Z]{3}$/, 'Route must be in format XXX-YYY or XXX-YYY-ZZZ.'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -51,7 +51,7 @@ export default function AirlineComparison() {
     setError(null);
     setData(null);
     try {
-      const result = await getAirlineComparisonData({
+      const result = await getAirlineComparison({
         route: values.route.toUpperCase(),
       });
       if (!result.isValidRoute) {

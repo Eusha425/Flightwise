@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Image from 'next/image';
+import Map, { Marker, Source, Layer, type LayerProps } from 'react-map-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+
 import {
   Card,
   CardContent,
@@ -22,7 +24,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Loader2, Send, Globe, PlaneTakeoff } from 'lucide-react';
+import { Loader2, Send, Globe, PlaneTakeoff, MapPin } from 'lucide-react';
 import { getRouteExplorerData } from '@/lib/actions';
 import { type RouteExplorerOutput } from '@/ai/flows/route-explorer';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
@@ -32,6 +34,23 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+
+const routeLayer: LayerProps = {
+    id: 'routes',
+    type: 'line',
+    source: 'routes',
+    layout: {
+      'line-join': 'round',
+      'line-cap': 'round',
+    },
+    paint: {
+      'line-color': 'hsl(var(--accent))',
+      'line-width': 2,
+      'line-opacity': 0.8,
+    },
+};
 
 export default function RouteExplorer() {
   const [loading, setLoading] = useState(false);
@@ -50,6 +69,9 @@ export default function RouteExplorer() {
     setError(null);
     setData(null);
     try {
+      if (!MAPBOX_TOKEN) {
+        throw new Error('Mapbox access token is not configured. Please add NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN to your .env file.');
+      }
       const result = await getRouteExplorerData({
         airport: values.airport.toUpperCase(),
       });
@@ -66,6 +88,25 @@ export default function RouteExplorer() {
       setLoading(false);
     }
   }
+
+  const routeGeoJson = useMemo(() => {
+    if (!data?.originCoords || !data.destinations) return null;
+    const features = data.destinations.map(dest => ({
+        type: 'Feature' as const,
+        properties: {},
+        geometry: {
+            type: 'LineString' as const,
+            coordinates: [
+                [data.originCoords!.lon, data.originCoords!.lat],
+                [dest.coords.lon, dest.coords.lat]
+            ]
+        }
+    }));
+    return {
+        type: 'FeatureCollection' as const,
+        features,
+    };
+  }, [data]);
 
   return (
     <Card>
@@ -117,7 +158,7 @@ export default function RouteExplorer() {
                 </div>
             )}
           </div>
-          <div className="md:col-span-2 flex min-h-[400px] items-center justify-center rounded-lg border border-dashed bg-muted/50 p-8">
+          <div className="md:col-span-2 flex min-h-[400px] items-center justify-center rounded-lg border border-dashed bg-muted/50 p-1 md:p-2">
             {loading && (
               <div className="flex flex-col items-center gap-2 text-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -132,17 +173,31 @@ export default function RouteExplorer() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            {data?.mapImageUrl && (
-              <div className="text-center w-full">
-                <Image 
-                    src={data.mapImageUrl} 
-                    alt="Map of routes" 
-                    width={800} 
-                    height={400} 
-                    className="rounded-lg object-cover"
-                    data-ai-hint="world map"
-                />
-              </div>
+            {data && data.originCoords && data.destinations && MAPBOX_TOKEN && (
+              <Map
+                initialViewState={{
+                  longitude: data.originCoords.lon,
+                  latitude: data.originCoords.lat,
+                  zoom: 3,
+                }}
+                mapboxAccessToken={MAPBOX_TOKEN}
+                mapStyle="mapbox://styles/mapbox/dark-v11"
+                style={{width: '100%', height: '100%', borderRadius: '0.5rem'}}
+              >
+                {routeGeoJson && (
+                    <Source id="routes" type="geojson" data={routeGeoJson}>
+                        <Layer {...routeLayer} />
+                    </Source>
+                )}
+                <Marker longitude={data.originCoords.lon} latitude={data.originCoords.lat}>
+                    <PlaneTakeoff className="h-6 w-6 text-primary fill-primary" />
+                </Marker>
+                {data.destinations.map(dest => (
+                    <Marker key={dest.code} longitude={dest.coords.lon} latitude={dest.coords.lat}>
+                        <MapPin className="h-5 w-5 text-accent fill-accent" />
+                    </Marker>
+                ))}
+              </Map>
             )}
             {!loading && !error && !data && (
               <div className="text-center text-muted-foreground">

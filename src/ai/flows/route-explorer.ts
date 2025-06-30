@@ -17,15 +17,21 @@ const RouteExplorerInputSchema = z.object({
 });
 export type RouteExplorerInput = z.infer<typeof RouteExplorerInputSchema>;
 
+const CoordsSchema = z.object({
+    lat: z.number().describe('Latitude'),
+    lon: z.number().describe('Longitude'),
+});
+
 const RouteExplorerOutputSchema = z.object({
   isValidAirport: z.boolean().describe('Whether the provided airport code is valid.'),
   airportName: z.string().optional().describe('The full name of the airport.'),
+  originCoords: CoordsSchema.optional().describe('The coordinates of the origin airport.'),
   destinations: z.array(z.object({
       code: z.string().describe('IATA code of the destination airport.'),
       name: z.string().describe('Name of the destination city/airport.'),
       country: z.string().describe('Country of the destination.'),
+      coords: CoordsSchema.describe('Coordinates of the destination airport.'),
     })).optional().describe('A list of reachable destinations.'),
-  mapImageUrl: z.string().optional().describe('A URL for an image of a map showing the routes.'),
 });
 export type RouteExplorerOutput = z.infer<typeof RouteExplorerOutputSchema>;
 
@@ -35,66 +41,71 @@ export async function exploreRoute(input: RouteExplorerInput): Promise<RouteExpl
 
 const getReachableDestinations = ai.defineTool({
     name: 'getReachableDestinations',
-    description: 'Retrieves all reachable destinations from a given airport.',
+    description: 'Retrieves all reachable destinations from a given airport, including their coordinates.',
     inputSchema: z.object({
       airport: z.string().describe('The IATA code of the origin airport.'),
     }),
     outputSchema: z.object({
       isValidAirport: z.boolean(),
       airportName: z.string().optional(),
+      originCoords: CoordsSchema.optional(),
       destinations: z.array(z.object({
           code: z.string(),
           name: z.string(),
           country: z.string(),
+          coords: CoordsSchema,
         })).optional(),
     }),
   }, async ({ airport }) => {
-    // Placeholder data
+    // Placeholder data with coordinates
     const airportData: { [key: string]: any } = {
       'JFK': {
         name: 'John F. Kennedy International Airport',
+        coords: { lat: 40.6413, lon: -73.7781 },
         destinations: [
-            { code: 'LAX', name: 'Los Angeles', country: 'USA' },
-            { code: 'LHR', name: 'London', country: 'UK' },
-            { code: 'CDG', name: 'Paris', country: 'France' },
-            { code: 'FRA', name: 'Frankfurt', country: 'Germany' },
-            { code: 'MEX', name: 'Mexico City', country: 'Mexico' },
-            { code: 'MIA', name: 'Miami', country: 'USA' },
-            { code: 'SFO', name: 'San Francisco', country: 'USA' },
-            { code: 'ATL', name: 'Atlanta', country: 'USA' },
-            { code: 'JNB', name: 'Johannesburg', country: 'South Africa' },
-            { code: 'DXB', name: 'Dubai', country: 'UAE' },
-            { code: 'HND', name: 'Tokyo', country: 'Japan' },
-            { code: 'GRU', name: 'Sao Paulo', country: 'Brazil' },
-            { code: 'SYD', name: 'Sydney', country: 'Australia' },
-            { code: 'BOM', name: 'Mumbai', country: 'India' },
+            { code: 'LAX', name: 'Los Angeles', country: 'USA', coords: { lat: 33.9416, lon: -118.4085 } },
+            { code: 'LHR', name: 'London', country: 'UK', coords: { lat: 51.4700, lon: -0.4543 } },
+            { code: 'CDG', name: 'Paris', country: 'France', coords: { lat: 49.0097, lon: 2.5479 } },
+            { code: 'FRA', name: 'Frankfurt', country: 'Germany', coords: { lat: 50.0379, lon: 8.5622 } },
+            { code: 'MEX', name: 'Mexico City', country: 'Mexico', coords: { lat: 19.4363, lon: -99.0721 } },
+            { code: 'MIA', name: 'Miami', country: 'USA', coords: { lat: 25.7959, lon: -80.2870 } },
+            { code: 'SFO', name: 'San Francisco', country: 'USA', coords: { lat: 37.6213, lon: -122.3790 } },
+            { code: 'ATL', name: 'Atlanta', country: 'USA', coords: { lat: 33.6407, lon: -84.4277 } },
+            { code: 'JNB', name: 'Johannesburg', country: 'South Africa', coords: { lat: -26.1392, lon: 28.2460 } },
+            { code: 'DXB', name: 'Dubai', country: 'UAE', coords: { lat: 25.2532, lon: 55.3657 } },
+            { code: 'HND', name: 'Tokyo', country: 'Japan', coords: { lat: 35.5494, lon: 139.7798 } },
+            { code: 'GRU', name: 'Sao Paulo', country: 'Brazil', coords: { lat: -23.4356, lon: -46.4731 } },
+            { code: 'SYD', name: 'Sydney', country: 'Australia', coords: { lat: -33.9399, lon: 151.1753 } },
+            { code: 'BOM', name: 'Mumbai', country: 'India', coords: { lat: 19.0896, lon: 72.8656 } },
         ],
       },
       'LHR': {
         name: 'London Heathrow',
+        coords: { lat: 51.4700, lon: -0.4543 },
         destinations: [
-          { code: 'JFK', name: 'New York', country: 'USA' },
-          { code: 'SIN', name: 'Singapore', country: 'Singapore' },
-          { code: 'HKG', name: 'Hong Kong', country: 'Hong Kong' },
-          { code: 'SYD', name: 'Sydney', country: 'Australia' },
-          { code: 'DXB', name: 'Dubai', country: 'UAE' },
-          { code: 'JNB', name: 'Johannesburg', country: 'South Africa' },
+          { code: 'JFK', name: 'New York', country: 'USA', coords: { lat: 40.6413, lon: -73.7781 } },
+          { code: 'SIN', name: 'Singapore', country: 'Singapore', coords: { lat: 1.3644, lon: 103.9915 } },
+          { code: 'HKG', name: 'Hong Kong', country: 'Hong Kong', coords: { lat: 22.3080, lon: 113.9185 } },
+          { code: 'SYD', name: 'Sydney', country: 'Australia', coords: { lat: -33.9399, lon: 151.1753 } },
+          { code: 'DXB', name: 'Dubai', country: 'UAE', coords: { lat: 25.2532, lon: 55.3657 } },
+          { code: 'JNB', name: 'Johannesburg', country: 'South Africa', coords: { lat: -26.1392, lon: 28.2460 } },
         ],
       },
       'SYD': {
         name: 'Sydney Airport',
+        coords: { lat: -33.9399, lon: 151.1753 },
         destinations: [
-          { code: 'LAX', name: 'Los Angeles', country: 'USA' },
-          { code: 'SIN', name: 'Singapore', country: 'Singapore' },
-          { code: 'AKL', name: 'Auckland', country: 'New Zealand' },
-          { code: 'HKG', name: 'Hong Kong', country: 'Hong Kong' },
-          { code: 'DXB', name: 'Dubai', country: 'UAE' },
+          { code: 'LAX', name: 'Los Angeles', country: 'USA', coords: { lat: 33.9416, lon: -118.4085 } },
+          { code: 'SIN', name: 'Singapore', country: 'Singapore', coords: { lat: 1.3644, lon: 103.9915 } },
+          { code: 'AKL', name: 'Auckland', country: 'New Zealand', coords: { lat: -37.0082, lon: 174.7917 } },
+          { code: 'HKG', name: 'Hong Kong', country: 'Hong Kong', coords: { lat: 22.3080, lon: 113.9185 } },
+          { code: 'DXB', name: 'Dubai', country: 'UAE', coords: { lat: 25.2532, lon: 55.3657 } },
         ],
       },
     };
     const data = airportData[airport.toUpperCase()];
     if (data) {
-      return { isValidAirport: true, airportName: data.name, destinations: data.destinations };
+      return { isValidAirport: true, airportName: data.name, originCoords: data.coords, destinations: data.destinations };
     }
     return { isValidAirport: false };
   }
@@ -111,7 +122,7 @@ const prompt = ai.definePrompt({
   
   Airport: {{{airport}}}
   
-  Return the validation status, airport name, and list of destinations. If the airport is invalid, just return isValidAirport: false.`,
+  Return the validation status, airport name, origin coordinates, and list of destinations with their coordinates. If the airport is invalid, just return isValidAirport: false.`,
 });
 
 const routeExplorerFlow = ai.defineFlow(
@@ -122,30 +133,6 @@ const routeExplorerFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await prompt(input);
-    if (output?.isValidAirport && output.destinations && output.destinations.length > 0) {
-        const imageGenPrompt = `A stylized, minimalist world map showing flight paths originating from ${output.airportName}. The map should have a clean, modern aesthetic, with deep sky blue oceans and light gray continents. Show numerous bright orange flight paths radiating out from the origin to various international destinations.`;
-
-        try {
-            const {media} = await ai.generate({
-                model: 'googleai/gemini-2.0-flash-preview-image-generation',
-                prompt: imageGenPrompt,
-                config: {
-                    responseModalities: ['TEXT', 'IMAGE'],
-                },
-            });
-
-            if (media?.url) {
-                output.mapImageUrl = media.url;
-            } else {
-                 output.mapImageUrl = 'https://placehold.co/800x400.png';
-            }
-        } catch (e) {
-            console.error("Image generation for route map failed:", e);
-            output.mapImageUrl = 'https://placehold.co/800x400.png';
-        }
-    } else if (output?.isValidAirport) {
-        output.mapImageUrl = 'https://placehold.co/800x400.png';
-    }
     return output!;
   }
 );

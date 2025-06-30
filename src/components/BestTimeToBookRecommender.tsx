@@ -34,7 +34,7 @@ import { getBookingRecommendation } from '@/lib/actions';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const formSchema = z.object({
-  route: z.string().min(3, 'Route must be at least 3 characters, e.g., SYD-LHR.'),
+  route: z.string().regex(/^([A-Z]{3}-)+[A-Z]{3}$/, 'Route must be in format XXX-YYY or XXX-YYY-ZZZ.'),
   departureDate: z.date({
     required_error: 'A departure date is required.',
   }),
@@ -60,7 +60,7 @@ export default function BestTimeToBookRecommender() {
     setRecommendation(null);
     try {
       const result = await getBookingRecommendation({
-        route: values.route,
+        route: values.route.toUpperCase(),
         departureDate: format(values.departureDate, 'yyyy-MM-dd'),
       });
       setRecommendation(result.recommendation);
@@ -93,7 +93,7 @@ export default function BestTimeToBookRecommender() {
                   <FormItem>
                     <FormLabel>Flight Route</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., JFK-LHR" {...field} />
+                      <Input placeholder="e.g., JFK-LHR" {...field} onChange={(e) => field.onChange(e.target.value.toUpperCase())} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
