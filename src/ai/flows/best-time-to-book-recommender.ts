@@ -86,17 +86,14 @@ const prompt = ai.definePrompt({
   input: {schema: BestTimeToBookRecommenderInputSchema},
   output: {schema: BestTimeToBookRecommenderOutputSchema},
   tools: [getHistoricalFlightPrices],
-  prompt: `You are an expert travel consultant. Your goal is to recommend the best time to book a flight based on historical price data.
-
-  The user wants to travel the route '{{{route}}}' on '{{{departureDate}}}'.
-
-  You have access to a tool called 'getHistoricalFlightPrices' that provides past price data for this route.
-
-  1. Call the 'getHistoricalFlightPrices' tool with the user's route and departure date.
-  2. Analyze the historical price data returned by the tool. Look for trends (e.g., are prices generally increasing, decreasing, or stable?).
-  3. Based on your analysis, provide a clear recommendation. For example: "Prices are currently low, book now. Confidence: High." or "Prices are trending down, it's better to wait a few weeks. Confidence: Medium."
-  4. Formulate your final answer into the required JSON format.
-`,config: {
+  system: `You are an expert travel consultant. Your goal is to recommend the best time to book a flight based on historical price data.
+You have access to a tool called 'getHistoricalFlightPrices' that provides past price data for this route.
+1. Call the 'getHistoricalFlightPrices' tool with the user's route and departure date.
+2. Analyze the historical price data returned by the tool. Look for trends (e.g., are prices generally increasing, decreasing, or stable?).
+3. Based on your analysis, provide a clear recommendation. For example: "Prices are currently low, book now. Confidence: High." or "Prices are trending down, it's better to wait a few weeks. Confidence: Medium."
+4. Formulate your final answer into the required JSON format.`,
+  prompt: `Recommend the best time to book for a flight on route {{{route}}} for departure date {{{departureDate}}}.`,
+  config: {
     safetySettings: [
       {
         category: 'HARM_CATEGORY_HATE_SPEECH',
