@@ -168,8 +168,8 @@ export default function RouteExplorer() {
                  <div className="mt-6">
                     <h3 className="font-semibold text-lg mb-2">Destinations from {data.airportName}</h3>
                     <ul className="space-y-2 text-sm text-muted-foreground max-h-80 overflow-y-auto">
-                        {data.destinations.map(dest => (
-                            <li key={dest.code} className="flex items-center gap-2">
+                        {data.destinations.map((dest, index) => (
+                            <li key={`${dest.code}-${index}`} className="flex items-center gap-2">
                                 <PlaneTakeoff className="h-4 w-4 text-primary" />
                                 <span>{dest.name} ({dest.code}), {dest.country}</span>
                             </li>
@@ -211,8 +211,8 @@ export default function RouteExplorer() {
                 <Marker longitude={data.originCoords.lon} latitude={data.originCoords.lat}>
                     <PlaneTakeoff className="h-6 w-6 text-primary fill-primary" />
                 </Marker>
-                {data.destinations.map(dest => (
-                    <Marker key={dest.code} longitude={dest.coords.lon} latitude={dest.coords.lat}>
+                {data.destinations.map((dest, index) => (
+                    <Marker key={`${dest.code}-${index}`} longitude={dest.coords.lon} latitude={dest.coords.lat}>
                         <MapPin className="h-5 w-5 text-accent fill-accent" />
                     </Marker>
                 ))}
