@@ -109,12 +109,3 @@ Once FlightWise is running, you can explore these capabilities:
 | 📈 **Price Analysis** | Track trends and booking recommendations |
 | 🌍 **Interactive Maps** | Explore global flight networks |
 
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please ensure all submissions:
-
-- ✅ Follow the project's coding standards
-- 🧪 Include appropriate tests
-- 📝 Update documentation as needed
