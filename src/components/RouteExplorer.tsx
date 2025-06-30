@@ -44,7 +44,7 @@ const routeLayer: LayerProps = {
       'line-cap': 'round',
     },
     paint: {
-      'line-color': 'hsl(var(--accent))',
+      'line-color': '#E67E22',
       'line-width': 2,
       'line-opacity': 0.8,
     },
